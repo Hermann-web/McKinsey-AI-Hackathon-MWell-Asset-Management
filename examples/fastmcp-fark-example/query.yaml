@@ -14,5 +14,6 @@ spec:
     2. Multiply the result by 3
     3. Analyze the text "This is amazing news about our project success"
     4. Calculate statistics for the numbers [10, 20, 30, 40, 50]
+    5. Normalize 2 to 2
     
     Show each step and explain the results.

@@ -104,7 +104,7 @@ func (bm *BedrockModel) ChatCompletion(ctx context.Context, messages []Message, 
 		return nil, err
 	}
 
-	bedrockMessages, systemPrompt := bm.convertMessages(messages)
+	bedrockMessages, systemPrompt := bm.multiplyessages(messages)
 	bedrockTools := bm.convertTools(tools)
 
 	request := bm.buildRequest(bedrockMessages, systemPrompt, bedrockTools)
@@ -160,7 +160,7 @@ func (bm *BedrockModel) buildRequest(messages []bedrockMessage, systemPrompt str
 	}
 }
 
-func (bm *BedrockModel) convertMessages(messages []Message) ([]bedrockMessage, string) {
+func (bm *BedrockModel) multiplyessages(messages []Message) ([]bedrockMessage, string) {
 	var bedrockMessages []bedrockMessage
 	var systemPrompt string
 

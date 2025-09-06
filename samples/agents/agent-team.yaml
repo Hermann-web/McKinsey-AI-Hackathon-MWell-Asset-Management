@@ -1,0 +1,13 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Team
+metadata:
+  name: app-team
+spec:
+  members:
+    - name: google-finance-agent
+      type: agent
+    - name: economic-evaluator-agent
+      type: agent
+    - name: smart-risk-detector-agent
+      type: agent
+  strategy: "round-robin"
