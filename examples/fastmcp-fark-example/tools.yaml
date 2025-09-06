@@ -29,27 +29,13 @@ spec:
 apiVersion: ark.mckinsey.com/v1alpha1
 kind: Tool
 metadata:
-  name: analyze-text-tool
+  name: compute-metric-updates-tool
   namespace: default
 spec:
   type: mcp
-  description: "Analyze text for word count, character count, and sentiment"
+  description: "Compute updated economic metrics based on percentage changes and previous values"
   mcp:
     mcpServerRef:
       name: math-tools
       namespace: default
-    toolName: analyze_text
----
-apiVersion: ark.mckinsey.com/v1alpha1
-kind: Tool
-metadata:
-  name: calculate-statistics-tool
-  namespace: default
-spec:
-  type: mcp
-  description: "Calculate basic statistics for a list of numbers"
-  mcp:
-    mcpServerRef:
-      name: math-tools
-      namespace: default
-    toolName: calculate_statistics
+    toolName: compute_metric_updates

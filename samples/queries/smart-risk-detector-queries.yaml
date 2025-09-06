@@ -1,0 +1,78 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Query
+metadata:
+  name: smart-risk-analysis-query
+  namespace: default
+spec:
+  targets:
+    - name: smart-risk-detector-agent
+      type: agent
+  input: |
+    Please perform a comprehensive smart risk analysis for TechCorp Inc. with the following financial metrics:
+    
+    Current Metrics:
+    - Inflation: 3.2% (yesterday: 2.8%)
+    - Interest Rate: 4.5% (yesterday: 4.2%)
+    - Exchange Rate: 1.15 (yesterday: 1.12)
+    
+    Market News Summaries:
+    - "Tech sector shows strong growth with AI investments reaching record highs"
+    - "Central bank signals potential rate increases due to inflation concerns"
+    - "Supply chain disruptions continue to impact manufacturing costs"
+    - "International trade tensions affecting export markets"
+    
+    Please provide:
+    1. Updated financial metrics calculation
+    2. Comprehensive risk and opportunity analysis
+    3. Market sentiment and volatility assessment
+    4. Strategic recommendations for TechCorp Inc.
+---
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Query
+metadata:
+  name: high-risk-scenario-query
+  namespace: default
+spec:
+  targets:
+    - name: smart-risk-detector-agent
+      type: agent
+  input: |
+    Analyze a high-risk scenario for Global Manufacturing Ltd:
+    
+    Financial Metrics:
+    - Inflation: 6.8% (yesterday: 5.2%)
+    - Interest Rate: 7.2% (yesterday: 6.8%)
+    - Exchange Rate: 0.85 (yesterday: 0.92)
+    
+    Market Conditions:
+    - "Economic recession fears grow as inflation hits 15-year high"
+    - "Central banks implement aggressive monetary tightening"
+    - "Currency volatility reaches crisis levels in emerging markets"
+    - "Supply chain breakdowns cause widespread production delays"
+    
+    Provide detailed risk assessment and emergency response recommendations.
+---
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Query
+metadata:
+  name: opportunity-focused-query
+  namespace: default
+spec:
+  targets:
+    - name: smart-risk-detector-agent
+      type: agent
+  input: |
+    Evaluate growth opportunities for Innovation Startup Co:
+    
+    Financial Environment:
+    - Inflation: 1.8% (yesterday: 2.1%)
+    - Interest Rate: 2.3% (yesterday: 2.5%)
+    - Exchange Rate: 1.25 (yesterday: 1.22)
+    
+    Market Signals:
+    - "Technology sector experiences unprecedented investment boom"
+    - "Low interest rates create favorable financing conditions"
+    - "Strong currency enables international expansion opportunities"
+    - "Government announces innovation tax incentives"
+    
+    Focus on strategic opportunities and growth recommendations.

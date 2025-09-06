@@ -1,0 +1,376 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: math-tools
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: math-tools
+  template:
+    metadata:
+      labels:
+        app: math-tools
+    spec:
+      containers:
+      - name: math-tools
+        image: python:3.11-slim
+        command: ["python", "/app/run_server.py"]
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: PORT
+          value: "8000"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: app-code
+          mountPath: /app
+      volumes:
+      - name: app-code
+        configMap:
+          name: math-tools-code
+          defaultMode: 0755
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: math-tools-code
+  namespace: default
+data:
+  main.py: |
+    from typing import Annotated
+    from fastmcp import FastMCP
+
+    mcp = FastMCP("Math Tools 🧮")
+
+    @mcp.tool
+    def add(
+        a: Annotated[int, "First number to add"], 
+        b: Annotated[int, "Second number to add"]
+    ) -> int:
+        """Add two integers and return the sum"""
+        return a + b
+
+    @mcp.tool
+    def multiply(
+        a: Annotated[float, "First number to multiply"],
+        b: Annotated[float, "Second number to multiply"],
+    ) -> float:
+        """Multiply two numbers and return the product"""
+        return a * b
+
+    @mcp.tool
+    def analyze_text(
+        text: Annotated[str, "Text to analyze for word count and sentiment"]
+    ) -> dict:
+        """Analyze text and return word count, character count, and sentiment"""
+        words = text.split()
+        word_count = len(words)
+        char_count = len(text)
+        
+        # Simple sentiment analysis
+        positive_words = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic']
+        negative_words = ['bad', 'terrible', 'awful', 'horrible', 'disappointing']
+        
+        text_lower = text.lower()
+        positive_count = sum(1 for word in positive_words if word in text_lower)
+        negative_count = sum(1 for word in negative_words if word in text_lower)
+        
+        if positive_count > negative_count:
+            sentiment = "positive"
+        elif negative_count > positive_count:
+            sentiment = "negative"
+        else:
+            sentiment = "neutral"
+        
+        return {
+            "word_count": word_count,
+            "char_count": char_count,
+            "unique_words": len(set(word.lower() for word in words)),
+            "sentiment": sentiment,
+            "positive_words_found": positive_count,
+            "negative_words_found": negative_count
+        }
+
+    @mcp.tool
+    def calculate_statistics(
+        numbers: Annotated[list[float], "List of numbers to analyze"]
+    ) -> dict:
+        """Calculate basic statistics for a list of numbers"""
+        if not numbers:
+            return {"error": "Empty list provided"}
+        
+        return {
+            "count": len(numbers),
+            "sum": sum(numbers),
+            "average": sum(numbers) / len(numbers),
+            "min": min(numbers),
+            "max": max(numbers),
+            "range": max(numbers) - min(numbers)
+        }
+    from typing import Annotated, List, Optional
+    import statistics
+    from urllib.parse import urlparse
+    from pydantic import BaseModel, HttpUrl
+
+    class NewsInput(BaseModel):
+        sources: List[HttpUrl]
+
+
+    class NewsOutput(BaseModel):
+        summaries: List[str]
+        inflation_pct: Optional[float] = None
+        exchange_rate_pct: Optional[float] = None
+        interest_rate_pct: Optional[float] = None
+
+
+    class MetricsUpdateInput(BaseModel):
+        inflation_pct: float
+        exchange_rate_pct: float
+        interest_rate_pct: float
+        yesterday_inflation: float
+        yesterday_exchange_rate: float
+        yesterday_interest_rate: float
+
+
+    class MetricsUpdateOutput(BaseModel):
+        inflation: float
+        exchange_rate: float
+        interest_rate: float
+
+
+    class RiskOpportunityInput(BaseModel):
+        summaries: List[str]
+        metrics: MetricsUpdateOutput
+        firm: str
+
+
+    class RiskOpportunityOutput(BaseModel):
+        risks: List[str]
+        opportunities: List[str]
+
+
+    class RecommendationInput(BaseModel):
+        risks: List[str]
+        opportunities: List[str]
+
+
+    class RecommendationOutput(BaseModel):
+        synthesis: str
+        recommendations: List[str]
+
+
+    # --------------------
+    # IMPLEMENTATION FUNCTIONS
+    # --------------------
+
+    @mcp.tool
+    def analyze_news() -> NewsOutput:
+        sources = [
+            "https://www.google.com/finance/",
+            "https://bloomberg.com/article",
+            "https://fed.gov/announcement",
+        ]
+        urls = [HttpUrl(url) for url in sources]
+        data = NewsInput(sources=urls)
+        summaries, inflation_signals, exchange_signals, interest_signals = [], [], [], []
+
+        for source_url in data.sources:
+            domain = urlparse(str(source_url)).netloc.lower()
+
+            if "bloomberg" in domain or "reuters" in domain:
+                summaries.append(
+                    f"Financial markets report from {domain}: Mixed economic signals with focus on monetary policy"
+                )
+                inflation_signals.append(0.2)
+                exchange_signals.append(-0.1)
+                interest_signals.append(0.15)
+
+            elif "fed" in domain or "centralbank" in domain:
+                summaries.append(
+                    f"Central bank communication from {domain}: Policy stance remains data-dependent"
+                )
+                inflation_signals.append(0.1)
+                exchange_signals.append(0.05)
+                interest_signals.append(0.25)
+
+            elif "wsj" in domain or "ft.com" in domain:
+                summaries.append(
+                    f"Market analysis from {domain}: Corporate earnings and economic indicators show resilience"
+                )
+                inflation_signals.append(0.05)
+                exchange_signals.append(0.1)
+                interest_signals.append(0.0)
+
+            else:
+                summaries.append(
+                    f"Economic news from {domain}: General market developments and policy discussions"
+                )
+                inflation_signals.append(0.0)
+                exchange_signals.append(0.0)
+                interest_signals.append(0.05)
+
+        return NewsOutput(
+            summaries=summaries,
+            inflation_pct=statistics.mean(inflation_signals),
+            exchange_rate_pct=statistics.mean(exchange_signals),
+            interest_rate_pct=statistics.mean(interest_signals),
+        )
+
+
+    @mcp.tool
+    def compute_metric_updates(data: MetricsUpdateInput) -> MetricsUpdateOutput:
+        new_inflation = data.yesterday_inflation * (1 + data.inflation_pct / 100)
+        new_exchange_rate = data.yesterday_exchange_rate * (1 + data.exchange_rate_pct / 100)
+        new_interest_rate = data.yesterday_interest_rate * (1 + data.interest_rate_pct / 100)
+
+        return MetricsUpdateOutput(
+            inflation=round(max(0, min(new_inflation, 20)), 2),
+            exchange_rate=round(max(0.1, new_exchange_rate), 4),
+            interest_rate=round(max(0, min(new_interest_rate, 15)), 2),
+        )
+
+
+    @mcp.tool
+    def detect_risks_opportunities(data: RiskOpportunityInput) -> RiskOpportunityOutput:
+        risks, opportunities = [], []
+
+        if data.metrics.inflation > 4.0:
+            risks.append(f"High inflation ({data.metrics.inflation}%) may erode {data.firm}'s profit margins")
+            opportunities.append(f"Pricing power opportunities for {data.firm} in inflationary environment")
+        elif data.metrics.inflation < 1.0:
+            risks.append(f"Deflationary pressure ({data.metrics.inflation}%) may signal economic weakness")
+
+        if data.metrics.interest_rate > 6.0:
+            risks.append(f"High interest rates ({data.metrics.interest_rate}%) increase {data.firm}'s borrowing costs")
+            opportunities.append(f"Higher yields on {data.firm}'s cash investments")
+        elif data.metrics.interest_rate < 2.0:
+            opportunities.append(f"Low borrowing costs ({data.metrics.interest_rate}%) enable expansion financing for {data.firm}")
+
+        if data.metrics.exchange_rate > 1.2:
+            risks.append(f"Strong currency may hurt {data.firm}'s export competitiveness")
+            opportunities.append(f"Favorable conditions for {data.firm}'s international acquisitions")
+        elif data.metrics.exchange_rate < 0.9:
+            opportunities.append(f"Weak currency boosts {data.firm}'s export revenues")
+            risks.append(f"Higher import costs for {data.firm}'s international operations")
+
+        negative_keywords = ["uncertainty", "volatility", "decline", "crisis", "recession"]
+        positive_keywords = ["growth", "expansion", "bullish", "optimistic", "recovery"]
+
+        for summary in data.summaries:
+            s = summary.lower()
+            if any(k in s for k in negative_keywords):
+                risks.append(f"Market uncertainty may impact {data.firm}'s business confidence")
+            if any(k in s for k in positive_keywords):
+                opportunities.append(f"Positive market sentiment creates growth opportunities for {data.firm}")
+
+        return RiskOpportunityOutput(risks=risks, opportunities=opportunities)
+
+
+    @mcp.tool
+    def generate_recommendations(data: RecommendationInput) -> RecommendationOutput:
+        total = len(data.risks) + len(data.opportunities)
+        risk_ratio = len(data.risks) / total if total > 0 else 0
+
+        if risk_ratio > 0.6:
+            synthesis = "Defensive strategy recommended due to elevated risks."
+        elif risk_ratio < 0.3:
+            synthesis = "Aggressive growth strategy recommended given favorable conditions."
+        else:
+            synthesis = "Balanced strategy advised: mitigate risks while capturing opportunities."
+
+        recommendations = []
+
+        if any("inflation" in r.lower() for r in data.risks):
+            recommendations += [
+                "Implement dynamic pricing to protect margins",
+                "Consider inflation-hedged investments",
+            ]
+
+        if any("interest rate" in r.lower() for r in data.risks):
+            recommendations += [
+                "Refinance debt before further rate increases",
+                "Accelerate capital projects while rates remain manageable",
+            ]
+
+        if any("currency" in r.lower() or "exchange" in r.lower() for r in data.risks):
+            recommendations += [
+                "Use currency hedging for international operations",
+                "Diversify revenues across multiple currencies",
+            ]
+
+        if any("growth" in o.lower() or "expansion" in o.lower() for o in data.opportunities):
+            recommendations += [
+                "Accelerate expansion plans",
+                "Boost marketing to capture share",
+            ]
+
+        if any("acquisition" in o.lower() or "investment" in o.lower() for o in data.opportunities):
+            recommendations += [
+                "Evaluate acquisition opportunities",
+                "Strengthen balance sheet for investments",
+            ]
+
+        if not recommendations:
+            recommendations = [
+                "Monitor economic indicators",
+                "Maintain flexibility",
+                "Strengthen stakeholder communication",
+            ]
+
+        return RecommendationOutput(synthesis=synthesis, recommendations=recommendations)
+
+
+    if __name__ == "__main__":
+        mcp.run(transport="http", host="0.0.0.0", port=8000, path="/")
+
+    if __name__ == "__main__":
+        mcp.run(transport="http", host="0.0.0.0", port=8000, path="/")
+  run_server.py: |
+    import sys
+    import os
+    sys.path.append('/app')
+    
+    # Install requirements
+    os.system('pip install fastmcp')
+    
+    # Import and run the MCP server
+    from main import mcp
+    mcp.run(transport="http", host="0.0.0.0", port=8000, path="/")
+  requirements.txt: |
+    fastmcp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: math-tools
+  namespace: default
+spec:
+  ports:
+  - port: 8000
+    targetPort: http
+    name: http
+  selector:
+    app: math-tools
+---
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: MCPServer
+metadata:
+  name: math-tools
+  namespace: default
+spec:
+  address:
+    valueFrom:
+      serviceRef:
+        name: math-tools
+  transport: http
+  timeout: 30s
+  description: "Mathematical and text analysis tools MCP server"
