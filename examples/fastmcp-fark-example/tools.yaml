@@ -1,0 +1,55 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: add-tool
+  namespace: default
+spec:
+  type: mcp
+  description: "Add two integers and return the sum"
+  mcp:
+    mcpServerRef:
+      name: math-tools
+      namespace: default
+    toolName: add
+---
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: multiply-tool
+  namespace: default
+spec:
+  type: mcp
+  description: "Multiply two numbers and return the product"
+  mcp:
+    mcpServerRef:
+      name: math-tools
+      namespace: default
+    toolName: multiply
+---
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: analyze-text-tool
+  namespace: default
+spec:
+  type: mcp
+  description: "Analyze text for word count, character count, and sentiment"
+  mcp:
+    mcpServerRef:
+      name: math-tools
+      namespace: default
+    toolName: analyze_text
+---
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: calculate-statistics-tool
+  namespace: default
+spec:
+  type: mcp
+  description: "Calculate basic statistics for a list of numbers"
+  mcp:
+    mcpServerRef:
+      name: math-tools
+      namespace: default
+    toolName: calculate_statistics

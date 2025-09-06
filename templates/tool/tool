@@ -1,0 +1,13 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: tool-analyzenews
+  namespace: default
+spec:
+  type: mcp
+  description: "Analyzes news sources and extracts economic indicators including inflation, exchange rates, and interest rates"
+  mcp:
+    mcpServerRef:
+      name: tool
+      namespace: default
+    toolName: analyzenews

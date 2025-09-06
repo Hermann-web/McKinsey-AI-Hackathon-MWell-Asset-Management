@@ -1,0 +1,161 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: math-tools
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: math-tools
+  template:
+    metadata:
+      labels:
+        app: math-tools
+    spec:
+      containers:
+      - name: math-tools
+        image: python:3.11-slim
+        command: ["python", "/app/run_server.py"]
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: PORT
+          value: "8000"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: app-code
+          mountPath: /app
+      volumes:
+      - name: app-code
+        configMap:
+          name: math-tools-code
+          defaultMode: 0755
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: math-tools-code
+  namespace: default
+data:
+  main.py: |
+    from typing import Annotated
+    from fastmcp import FastMCP
+
+    mcp = FastMCP("Math Tools 🧮")
+
+    @mcp.tool
+    def add(
+        a: Annotated[int, "First number to add"], 
+        b: Annotated[int, "Second number to add"]
+    ) -> int:
+        """Add two integers and return the sum"""
+        return a + b
+
+    @mcp.tool
+    def multiply(
+        a: Annotated[float, "First number to multiply"],
+        b: Annotated[float, "Second number to multiply"],
+    ) -> float:
+        """Multiply two numbers and return the product"""
+        return a * b
+
+    @mcp.tool
+    def analyze_text(
+        text: Annotated[str, "Text to analyze for word count and sentiment"]
+    ) -> dict:
+        """Analyze text and return word count, character count, and sentiment"""
+        words = text.split()
+        word_count = len(words)
+        char_count = len(text)
+        
+        # Simple sentiment analysis
+        positive_words = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic']
+        negative_words = ['bad', 'terrible', 'awful', 'horrible', 'disappointing']
+        
+        text_lower = text.lower()
+        positive_count = sum(1 for word in positive_words if word in text_lower)
+        negative_count = sum(1 for word in negative_words if word in text_lower)
+        
+        if positive_count > negative_count:
+            sentiment = "positive"
+        elif negative_count > positive_count:
+            sentiment = "negative"
+        else:
+            sentiment = "neutral"
+        
+        return {
+            "word_count": word_count,
+            "char_count": char_count,
+            "unique_words": len(set(word.lower() for word in words)),
+            "sentiment": sentiment,
+            "positive_words_found": positive_count,
+            "negative_words_found": negative_count
+        }
+
+    @mcp.tool
+    def calculate_statistics(
+        numbers: Annotated[list[float], "List of numbers to analyze"]
+    ) -> dict:
+        """Calculate basic statistics for a list of numbers"""
+        if not numbers:
+            return {"error": "Empty list provided"}
+        
+        return {
+            "count": len(numbers),
+            "sum": sum(numbers),
+            "average": sum(numbers) / len(numbers),
+            "min": min(numbers),
+            "max": max(numbers),
+            "range": max(numbers) - min(numbers)
+        }
+
+    if __name__ == "__main__":
+        mcp.run(transport="http", host="0.0.0.0", port=8000, path="/")
+  run_server.py: |
+    import sys
+    import os
+    sys.path.append('/app')
+    
+    # Install requirements
+    os.system('pip install fastmcp')
+    
+    # Import and run the MCP server
+    from main import mcp
+    mcp.run(transport="http", host="0.0.0.0", port=8000, path="/")
+  requirements.txt: |
+    fastmcp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: math-tools
+  namespace: default
+spec:
+  ports:
+  - port: 8000
+    targetPort: http
+    name: http
+  selector:
+    app: math-tools
+---
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: MCPServer
+metadata:
+  name: math-tools
+  namespace: default
+spec:
+  address:
+    valueFrom:
+      serviceRef:
+        name: math-tools
+  transport: http
+  timeout: 30s
+  description: "Mathematical and text analysis tools MCP server"

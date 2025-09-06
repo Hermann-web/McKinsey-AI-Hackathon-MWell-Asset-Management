@@ -1,0 +1,17 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Query
+metadata:
+  name: google-finance-trends-query
+  namespace: default
+spec:
+  targets:
+    - name: google-finance-agent
+      type: agent
+  input: |
+    Analyze the current trends in technology stocks and provide insights on:
+    1. Top performing tech companies
+    2. Key market drivers
+    3. Potential risks and opportunities
+    4. Recent news affecting the sector
+    
+    Focus on the past week's performance and any significant developments.

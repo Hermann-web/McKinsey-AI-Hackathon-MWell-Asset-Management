@@ -1,0 +1,41 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: google-finance-tool
+  namespace: default
+spec:
+  type: http
+  description: "Fetches current Google Finance trends and market data using SerpAPI"
+  inputSchema:
+    type: object
+    properties:
+      q:
+        type: string
+        description: "Search query for financial trends (e.g., 'stock market trends', 'crypto news', 'tech stocks')"
+        default: "stock market trends"
+      location:
+        type: string
+        description: "Location for localized results (e.g., 'United States', 'United Kingdom')"
+        default: "United States"
+      num_results:
+        type: integer
+        description: "Number of results to return (1-100)"
+        default: 10
+        minimum: 1
+        maximum: 100
+      timeframe:
+        type: string
+        description: "Time period for trends (past_hour, past_day, past_week, past_month, past_year)"
+        default: "past_day"
+        enum: ["past_hour", "past_day", "past_week", "past_month", "past_year"]
+    required: ["q"]
+  http:
+    url: https://serpapi.com/search?engine=google_finance&q={q}&api_key=c58bdf000acf202cb02175c8c726c4e21560ff65da7d115c79ac411c6de290dc
+    body: |
+      {
+        "engine": "google_finance",
+        "q": "{{.input.query}}",
+        "location": "{{.input.location}}",
+        "num": "{{.input.num_results}}",
+        "tbs": "qdr:{{.input.timeframe}}"
+      }

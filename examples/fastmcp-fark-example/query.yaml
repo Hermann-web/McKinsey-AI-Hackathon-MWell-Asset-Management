@@ -1,0 +1,18 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Query
+metadata:
+  name: math-analysis-query
+  namespace: default
+spec:
+  targets:
+    - name: math-agent
+      type: agent
+  input: |
+    Please help me with the following tasks:
+    
+    1. Add 15 and 25
+    2. Multiply the result by 3
+    3. Analyze the text "This is amazing news about our project success"
+    4. Calculate statistics for the numbers [10, 20, 30, 40, 50]
+    
+    Show each step and explain the results.
