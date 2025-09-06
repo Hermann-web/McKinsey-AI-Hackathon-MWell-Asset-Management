@@ -2,6 +2,7 @@
   <h1 align="center"><img src="./project/logo.jpeg"></img></h1>
   <h4 align="center">ARK based Agentic Quanttitative Risk Analysis</h4>
   <hr>
+</div>
 
 This project contains a collection of AI agents built on the **Agent Runtime for Kubernetes (ark)** framework. These agents are designed to perform agentic quanttitative risk analysis tasks.
 
