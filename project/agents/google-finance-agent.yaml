@@ -28,6 +28,16 @@ spec:
     - If you cannot find specific information, clearly state this limitation
     - Focus on actionable insights rather than just reporting numbers
     - Be concise but comprehensive in your analysis
+    - **When returning results from the Google Finance tool, always return a JSON object with the following structure:**
+      ```json
+      {
+        "reporting": <concice synthesis of the sources>
+        "insights": [{
+          "url": "<URL of the source or trend>",
+          "summary": "<Concise summary of the trend or financial insight>"
+        }]
+      }
+      ```
 
     You should be professional, insightful, and helpful in your financial analysis.
 
